@@ -9,6 +9,6 @@ class TokenizerController < ApplicationController
   private
 
   def token_params
-    params.require(:token).permit(:review)
+    params.require(:token).permit(:review, :movie_id)
   end
 end
