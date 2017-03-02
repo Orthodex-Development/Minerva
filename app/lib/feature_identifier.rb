@@ -1,7 +1,6 @@
 class FeatureIdentifier
-  require "byebug"
-  require "stemmer"
-  require_relative "tokenizer"
+  require 'byebug'
+  require_relative 'tokenizer'
 
   attr_accessor :tokenizer, :features, :aspect_hash
   alias :f :features
@@ -14,31 +13,20 @@ class FeatureIdentifier
     extract_aspects
   end
 
-
-  def remove_punctuations
-    @features.map! do |phrase|
-      temp = phrase.dup
-      temp.slice! /\p{P}/ =~ phrase if /\p{P}/ =~ phrase
-      temp
-    end
-    byebug
-    # @features.map! { |phrase| phrase.slice! /\p{P}/ =~ phrase if /\p{P}/ =~ phrase }
-  end
-
   private
 
   def clean
     # redundancy pruning: remove single world proper nouns
     @features = t.phrases - t.proper_nouns
     puts "features size after redundancy pruning: #{@features.size}"
+    clean_duplicates
+    puts "features size after duplicacy pruning: #{@features.size}"
     remove_punctuations
     puts "features size after removing punctuations: #{@features.size}"
     clean_stop_words
     puts "features size after cleaning stop words: #{@features.size}"
     stem
     puts "features size after porter stemming: #{@features.size}"
-    clean_duplicates
-    puts "features size after duplicacy pruning: #{@features.size}"
   end
 
   def extract_aspects
@@ -56,7 +44,11 @@ class FeatureIdentifier
         end
       end
     end
-    @aspect_hash
+    map_proper_nouns
+  end
+
+  def map_proper_nouns
+    # TODO: Map pronouns to proper nouns
   end
 
   def clean_duplicates
@@ -75,8 +67,12 @@ class FeatureIdentifier
     end
   end
 
-  def map_proper_nouns
-    #code
+  def remove_punctuations
+    @features.map! do |phrase|
+      temp = phrase.dup
+      temp.slice! /\p{P}/ =~ phrase if /\p{P}/ =~ phrase
+      temp
+    end
   end
 
   def clean_stop_words
@@ -87,6 +83,8 @@ class FeatureIdentifier
   end
 
   def stem
-    @features.map! { |phrase| phrase.stem if t.proper_nouns.include? phrase }
+    # User Porter Stemming on all phrases except those containing capitalized words.
+    # It is safe to assume that capitalized words either are or refer to proper nouns.
+    @features.map! { |phrase| /[[:upper:]]/.match(phrase) ? phrase : phrase.stem }
   end
 end
