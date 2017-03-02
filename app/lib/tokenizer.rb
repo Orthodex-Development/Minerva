@@ -1,7 +1,7 @@
 class Tokenizer
   require 'engtagger'
 
-  attr_accessor :review, :sentences, :tagger
+  attr_accessor :review, :sentences, :tagger, :tagged
 
   def initialize(review = nil, movie_id = 10)
     @review = get_review
