@@ -2,13 +2,14 @@ class FeatureIdentifier
   require 'byebug'
   require_relative 'tokenizer'
 
-  attr_accessor :tokenizer, :features, :aspect_hash
+  attr_accessor :tokenizer, :features, :aspect_hash, :adjectives
   alias :f :features
   alias :t :tokenizer
 
   def initialize(tokenizer)
     @aspect_hash = {}
     @tokenizer = tokenizer
+    @adjectives = t.adjectives
     clean
     extract_aspects
   end
@@ -19,27 +20,44 @@ class FeatureIdentifier
     # redundancy pruning: remove single world proper nouns
     @features = t.phrases - t.proper_nouns
     puts "features size after redundancy pruning: #{@features.size}"
+    clean_stop_words
+    puts "features size after cleaning stop words: #{@features.size}"
     clean_duplicates
     puts "features size after duplicacy pruning: #{@features.size}"
     remove_punctuations
     puts "features size after removing punctuations: #{@features.size}"
-    clean_stop_words
-    puts "features size after cleaning stop words: #{@features.size}"
-    stem
-    puts "features size after porter stemming: #{@features.size}"
+    #stem
+    #puts "features size after porter stemming: #{@features.size}"
   end
 
   def extract_aspects
     t.get_sentences.each do |line|
-      a = line.split(" ") & t.adjectives
-      if !a.nil?
-        p =  line.match(/.*\s#{@features.join("|")}.*/i).to_a
-        if !p.empty? && !p.nil?
-          aspect_sentence = line
+      # For each sentence
+      p =  line.scan(/(#{@features.join("|")})/i).flatten
+      if !p.empty? && !p.nil?
+        # If it containes a feature, extract all adjectives
+        a = line.split(" ") & @adjectives
+        if !a.nil? && !a.empty?
+          # For each feature in the sentence
           p.each do |phrase|
+            # the nearby adjective is recorded as its effective
+            # opinion. A nearby adjective refers to the adjacent
+            # adjective that modifies the noun/noun phrase that is a
+            # frequent feature.
+            #opinion_phrase = line.split(/[\?,\!,\,,]/)
+            opinion_phrase = line
+            #opinion_phrase.map! do |line|
+            #  if line.include? phrase
+            #    next line
+            #  end
+            #end
+            #opinion_phrase.compact!.to_s
+            #opinions = opinion_phrase[0].scan(/(#{a.join("|")})/i).flatten
+            opinions = opinion_phrase.scan(/(#{a.join("|")})/i).flatten
+
             @aspect_hash[phrase.to_sym] = {}
-            @aspect_hash[phrase.to_sym][:opinions] = a
-            @aspect_hash[phrase.to_sym][:sentences] = aspect_sentence
+            @aspect_hash[phrase.to_sym][:opinions] = opinions
+            @aspect_hash[phrase.to_sym][:sentences] = opinion_phrase
           end
         end
       end
@@ -76,9 +94,10 @@ class FeatureIdentifier
   end
 
   def clean_stop_words
-    File.open("stopwords.txt", "r") do |file|
-      stop_word = file.readline
+    File.open("stopwords.txt", "r").each do |line|
+      stop_word = line.chomp
       @features.delete(stop_word) if @features.include? stop_word
+      @adjectives.delete(stop_word) if @adjectives.include? stop_word
     end
   end
 
