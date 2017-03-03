@@ -11,6 +11,7 @@ class AspectDetectionWorker
     if result.nil?
       t = Tokenizer.new(review)
       f = FeatureIdentifier.new(t)
+      a = AspectDetector.new(f.aspect_hash)
     else
       sentiment_groups = result
     end
