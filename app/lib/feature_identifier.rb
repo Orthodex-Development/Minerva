@@ -44,20 +44,14 @@ class FeatureIdentifier
             # opinion. A nearby adjective refers to the adjacent
             # adjective that modifies the noun/noun phrase that is a
             # frequent feature.
-            #opinion_phrase = line.split(/[\?,\!,\,,]/)
-            opinion_phrase = line
-            #opinion_phrase.map! do |line|
-            #  if line.include? phrase
-            #    next line
-            #  end
-            #end
-            #opinion_phrase.compact!.to_s
-            #opinions = opinion_phrase[0].scan(/(#{a.join("|")})/i).flatten
+            opinion_phrase = line.split(/#{p.join("|")}/i)[p.find_index phrase]
             opinions = opinion_phrase.scan(/(#{a.join("|")})/i).flatten
 
-            @aspect_hash[phrase.to_sym] = {}
-            @aspect_hash[phrase.to_sym][:opinions] = opinions
-            @aspect_hash[phrase.to_sym][:sentences] = opinion_phrase
+            if !opinions.empty?
+              @aspect_hash[phrase.to_sym] = {}
+              @aspect_hash[phrase.to_sym][:opinions] = opinions
+              @aspect_hash[phrase.to_sym][:sentences] = opinion_phrase
+            end
           end
         end
       end

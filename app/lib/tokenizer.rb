@@ -3,16 +3,16 @@ class Tokenizer
 
   attr_accessor :review, :sentences, :tagger
 
-  def initialize(review, movie_id)
+  def initialize(review)
     # For development
-    @review = get_review
-    # @review = review
+    # @review = get_review
+    @review = review
     @tagger = EngTagger.new
     @tagged = @tagger.add_tags(@review)
   end
 
   def get_review
-    f = File.open("test.txt", "r")
+    f = File.open("text2.txt", "r")
     review = f.read
     f.close
     review
