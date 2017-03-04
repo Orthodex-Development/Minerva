@@ -5,8 +5,8 @@ class Tokenizer
 
   def initialize(review)
     # For development
-    # @review = get_review
-    @review = review
+    @review = get_review
+    #@review = review
     @tagger = EngTagger.new
     @tagged = @tagger.add_tags(@review)
   end

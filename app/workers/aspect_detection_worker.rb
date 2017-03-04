@@ -11,9 +11,10 @@ class AspectDetectionWorker
     if result.nil?
       t = Tokenizer.new(review)
       f = FeatureIdentifier.new(t)
-      a = AspectDetector.new(f.aspect_hash)
+      REDIS.setnx movie_id f.aspect_hash.to_json
     else
-      sentiment_groups = result
+      sentiment_groups = JSON.parse(REDIS.get movie_id)
     end
+    REDIS.quit
   end
 end
