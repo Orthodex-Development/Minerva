@@ -1,6 +1,4 @@
 class FeatureIdentifier
-  require 'byebug'
-  require_relative 'tokenizer'
 
   attr_accessor :tokenizer, :features, :aspect_hash, :adjectives
   alias :f :features
@@ -88,7 +86,8 @@ class FeatureIdentifier
   end
 
   def clean_stop_words
-    File.open("stopwords.txt", "r").each do |line|
+    stop_word_dir = Rails.root.join "app/lib/stopwords.txt"
+    File.open(stop_word_dir, "r").each do |line|
       stop_word = line.chomp
       @features.delete(stop_word) if @features.include? stop_word
       @adjectives.delete(stop_word) if @adjectives.include? stop_word

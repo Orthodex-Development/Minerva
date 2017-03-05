@@ -1,20 +1,22 @@
 class AspectDetectionWorker
   include Sidekiq::Worker
 
-  def perform(*args)
-    review = args.fetch(:review)
-    movie_id = args.fetch(:movie_id)
+  def perform(review, movie_id)
+    puts "Sidekiq: Received movie_id : #{movie_id}"
+    @movie_id = movie_id
 
-    REDIS = Redis.new(url: ENV["REDISCLOUD_URL"] || 'redis://localhost:6379/14')
-    result = REDIS.get movie_id
+    $REDIS = Redis.new(url: ENV["REDISCLOUD_URL"] || 'redis://localhost:6379/14')
+    result = $REDIS.get @movie_id
 
     if result.nil?
+      puts "Sidekiq: Movie not stored in REDIS, running opinion mining and feature extraction."
       t = Tokenizer.new(review)
       f = FeatureIdentifier.new(t)
-      REDIS.setnx movie_id f.aspect_hash.to_json
+      $REDIS.setnx @movie_id, f.aspect_hash.to_json
     else
-      sentiment_groups = JSON.parse(REDIS.get movie_id)
+      puts "Sidekiq: Movie found in REDIS."
+      sentiment_groups = JSON.parse($REDIS.get @movie_id)
     end
-    REDIS.quit
+    $REDIS.quit
   end
 end

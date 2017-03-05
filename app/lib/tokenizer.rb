@@ -1,12 +1,11 @@
 class Tokenizer
-  require 'engtagger'
 
   attr_accessor :review, :sentences, :tagger
 
   def initialize(review)
     # For development
-    @review = get_review
-    #@review = review
+    #@review = get_review
+    @review = review
     @tagger = EngTagger.new
     @tagged = @tagger.add_tags(@review)
   end
