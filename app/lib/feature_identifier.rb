@@ -10,7 +10,8 @@ class FeatureIdentifier
     @tokenizer = tokenizer
     @adjectives = t.adjectives
     clean
-    extract_aspects
+    extract_features
+    classify_features
   end
 
   private
@@ -29,7 +30,7 @@ class FeatureIdentifier
     #puts "features size after porter stemming: #{@features.size}"
   end
 
-  def extract_aspects
+  def extract_features
     t.get_sentences.each do |line|
       # For each sentence
       p =  line.scan(/(#{@features.join("|")})/i).flatten

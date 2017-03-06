@@ -1,5 +1,5 @@
 module AspectDetector
-  def merge_aspects
+  def classify_aspects
     hash = @aspect_hash.map do |key, value|
       response = HTTParty.get("http://rtw.ml.cmu.edu/rtw/api/json0?ent1=&lit1=#{key.to_s.split.join("+")}&predicate=*&ent2=&lit2=&agent=KI%2CKB%2CCKB%2COPRA%2COCMC")
       json = JSON.parse(response)
@@ -13,14 +13,14 @@ module AspectDetector
           puts "AspectDetector: NoMethodError occurred for key : #{key}"
           puts "#{e.message}"
           puts "#{e.backtrace.inspect}"
-
+          next
         end
       else
         puts "AspectDetector: An Error ocurred: #{json["message"]}"
         @aspect_hash.delete(key)
       end
     end
-    @aspect_hash = hash
+    @aspect_hash = hash.compact.to_h
     puts "AspectDetector: aspect_hash => #{aspect_hash}"
   end
 end
