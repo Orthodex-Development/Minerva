@@ -11,7 +11,7 @@ class FeatureIdentifier
     @adjectives = t.adjectives
     clean
     extract_features
-    classify_features
+    classify_aspects
   end
 
   private

@@ -4,7 +4,7 @@ module Api
 
     def tokenize
       # Send entire review to SA Module
-      # FullReviewDispatcherWorker.perform_async(token_params)
+      ReviewDispatcherWorker.perform_async(token_params[:review])
       AspectDetectionWorker.perform_async(token_params[:review], token_params[:movie_id])
       render :json => {:message => "received"}, :status => 200
     end
