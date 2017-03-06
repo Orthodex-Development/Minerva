@@ -1,4 +1,5 @@
 class FeatureIdentifier
+  include AspectDetector
 
   attr_accessor :tokenizer, :features, :aspect_hash, :adjectives
   alias :f :features
@@ -80,13 +81,17 @@ class FeatureIdentifier
   def remove_punctuations
     @features.map! do |phrase|
       temp = phrase.dup
-      temp.slice! /\p{P}/ =~ phrase if /\p{P}/ =~ phrase
+      match = temp.scan /\p{P}/
+      match.each do |char|
+        temp.slice! temp.index char
+      end
       temp
     end
   end
 
   def clean_stop_words
-    stop_word_dir = Rails.root.join "app/lib/stopwords.txt"
+    #stop_word_dir = Rails.root.join "app/lib/stopwords.txt"
+    stop_word_dir = "stopwords.txt"
     File.open(stop_word_dir, "r").each do |line|
       stop_word = line.chomp
       @features.delete(stop_word) if @features.include? stop_word

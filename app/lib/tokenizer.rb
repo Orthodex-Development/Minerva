@@ -18,7 +18,7 @@ class Tokenizer
   end
 
   def phrases
-    @tagger.get_words(@review).keys
+    @tagger.get_noun_phrases(@tagged).keys
   end
 
   def get_sentences
@@ -34,6 +34,6 @@ class Tokenizer
   end
 
   def adjectives
-    @tagger.get_adjectives(@tagged).keys
+    @tagger.get_adjectives(@tagged).keys + @tagger.get_comparative_adjectives(@tagged).keys + @tagger.get_superlative_adjectives(@tagged).keys
   end
 end
