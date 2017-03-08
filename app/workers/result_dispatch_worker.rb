@@ -14,7 +14,7 @@ class ResultDispatchWorker
     results = ""
 
     movie_aspect_sentiment.each do |k, v|
-      results << k.to_s + " => " + v.to_s + "\n "
+      results << k.to_s + " => " + ResultDispatchWorker.get_label(v) + "\n "
     end
 
     results = "Here are the results:\n " + results
@@ -28,5 +28,38 @@ class ResultDispatchWorker
       :headers => { 'Content-Type' => 'application/json' })
 
     $REDIS.quit
+  end
+
+  def self.get_label(params)
+    case params["label"]
+    when "pos" then
+      if params["score"] < 0
+        return "no strong sentiment"
+      elsif params["score"].between? 0, 1.2
+        return "1 like"
+      elsif params["score"].between? 1.2, 1.7
+        return "2 likes"
+      elsif params["score"].between? 1.7, 2.7
+        return "3 likes"
+      elsif params["score"].between? 2.7, 3.3
+        return "4 likes"
+      elsif params["score"] > 3.3
+        return "5 likes"
+      end
+    when "neg"
+      if params["score"] < 0
+        return "no strong sentiment"
+      elsif params["score"].between? 0, 1.2
+        return "1 dislike"
+      elsif params["score"].between? 1.2, 1.7
+        return "2 dislikes"
+      elsif params["score"].between? 1.7, 2,7
+        return "3 dislikes"
+      elsif params["score"].between? 2.7, 3.3
+        return "4 dislikes"
+      elsif params["score"] > 3.3
+        return "5 dislikes"
+      end
+    end
   end
 end
