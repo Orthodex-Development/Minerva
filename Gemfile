@@ -8,6 +8,7 @@ gem 'rails', '~> 5.0.1'
 gem 'puma', '~> 3.0'
 # Use Sidekiq for background processing
 gem 'sidekiq'
+gem 'sidekiq-batch'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # Use Redis adapter to run sidekiq jobs and store processed review data
