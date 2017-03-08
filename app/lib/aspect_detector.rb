@@ -12,7 +12,6 @@ module AspectDetector
         rescue NoMethodError => e
           puts "AspectDetector: NoMethodError occurred for key : #{key}"
           puts "#{e.message}"
-          puts "#{e.backtrace.inspect}"
           next
         end
       else

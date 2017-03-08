@@ -12,25 +12,32 @@ class AspectDetectionWorker
       puts "Sidekiq: Movie not stored in REDIS, running opinion mining and feature extraction."
       t = Tokenizer.new(review)
       f = FeatureIdentifier.new(t)
-      $REDIS.setnx @movie_id, 1
+      $REDIS.setnx "#{@movie_id}", 1
       $REDIS.setnx "rv_#{@movie_id}", review
       $REDIS.setnx "sg_#{@movie_id}", f.aspect_hash.to_json
+
+      # Send opinion sentences for each aspect to Sentiment Analysis module.
+      sentiment_groups = f.aspect_hash
+
+      sentiment_groups.each do |k, v|
+        ReviewDispatcherWorker.perform_async("sa_sg_#{movie_id}", f.aspect_hash[k][:sentences], k)
+      end
+
     else
-      puts "Sidekiq: Movie found in REDIS."
-      full_review = $REDIS.get "rv_#{@movie_id}"
+      puts "Sidekiq: Movie found in REDIS. Retrieving sentiments..."
+
+      full_movie_sentiment = JSON.parse($REDIS.get "sa_rv_#{movie_id}")
       sentiment_groups = JSON.parse($REDIS.get "sg_#{@movie_id}")
+
+      movie_aspect_sentiment = {}
+
+      sentiment_groups.each do |k, v|
+        movie_aspect_sentiment[k] = JSON.parse($REDIS.hget "sa_sg_#{movie_id}", k.to_s)
+      end
+
+      puts "Movie Sentiment: #{full_movie_sentiment}"
+      puts "Movie Aspects Sentiment: #{movie_aspect_sentiment}"
     end
-
-    # Send full review to Sentiment Analysis module.
-    ReviewDispatcherWorker.perform_async(movie_id, review)
-
-    # Send opinion sentences for each aspect to Sentiment Analysis module.
-    sentiment_groups = f.aspect_hash if sentiment_groups.nil?
-
-    sentiment_groups.each do |k, v|
-      ReviewDispatcherWorker.perform_async(k.to_s, f.aspect_hash[k][:sentences])
-    end
-
     $REDIS.quit
   end
 end

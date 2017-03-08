@@ -22,6 +22,8 @@ gem 'redis', '~> 3.0'
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
+# Network calls
+gem 'httparty'
 
 # Gem used for POS, Sentence detection
 gem 'engtagger'
