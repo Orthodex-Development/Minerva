@@ -14,10 +14,12 @@ class ResultDispatchWorker
     results = ""
 
     movie_aspect_sentiment.each do |k, v|
-      results << k.to_s + " => " + ResultDispatchWorker.get_label(v) + "\n "
+      results << k.to_s + " => " + ResultDispatchWorker.get_label(v) + "\n"
     end
 
-    results = "Here are the results:\n " + results
+    full_sentiment = ResultDispatchWorker.get_label(JSON.parse($REDIS.get "sa_rv_#{id}"))
+
+    results = "Here are the results:\nOverall sentiment: #{full_sentiment}\n" + results
 
     response = HTTParty.post(Rails.application.secrets.BOT_ENDPOINT + "analysis",
       :body => {

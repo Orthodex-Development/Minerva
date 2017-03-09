@@ -56,6 +56,7 @@ class FeatureIdentifier
         end
       end
     end
+    puts "FeatureIdentifier: No of extracted features are: #{aspect_hash.keys.size}"
     map_proper_nouns
   end
 

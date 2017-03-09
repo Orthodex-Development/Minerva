@@ -6,7 +6,7 @@ module AspectDetector
       if json["kind"] == "NELLQueryDemoJSON0"
         begin
           concept_array = json["items"][0]["ent1"]
-          concept_array = json["items"][0]["predicate"]
+          concept_array ||= json["items"][0]["predicate"]
           concept_array = concept_array.split ":"
           next [concept_array[0], value]
         rescue NoMethodError => e
