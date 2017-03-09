@@ -26,6 +26,7 @@ class FeatureIdentifier
     puts "features size after duplicacy pruning: #{@features.size}"
     remove_punctuations
     puts "features size after removing punctuations: #{@features.size}"
+    puts "Cleaned Features: #{@features}"
     #stem
     #puts "features size after porter stemming: #{@features.size}"
   end

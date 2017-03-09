@@ -26,19 +26,21 @@ class AspectDetectionWorker
 
       batch = Sidekiq::Batch.new
       batch.description = "Batch of Workers retrieving sentiment behind each aspect of a movie."
-      batch.on(:success, 'ResultDispatchWorker#perform_async', { :id => movie_id, :user => user })
+      batch.on(:success, AspectDetectionWorker, { :movie_id => movie_id, :user => user })
       batch.jobs do
         sentiment_groups.each do |k, v|
           ReviewDispatcherWorker.perform_async("sa_sg_#{movie_id}", f.aspect_hash[k][:sentences], k)
         end
       end
       puts "Just started Sidekiq Batch #{batch.bid}"
-
     else
       puts "AspectDetectionWorker: Movie found in REDIS. Running ResultDispatchWorker"
-
       ResultDispatchWorker.perform_async(movie_id, user)
     end
     $REDIS.quit
+  end
+
+  def on_success(status, params)
+    ResultDispatchWorker.perform_async(params["movie_id"], params["user"])
   end
 end

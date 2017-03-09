@@ -1,7 +1,11 @@
 module AspectDetector
   def classify_aspects
     hash = @aspect_hash.map do |key, value|
-      response = HTTParty.get("http://rtw.ml.cmu.edu/rtw/api/json0?ent1=&lit1=#{key.to_s.split.join("+")}&predicate=*&ent2=&lit2=&agent=KI%2CKB%2CCKB%2COPRA%2COCMC")
+      lit1 = key.to_s.split.join("+")
+      if !lit1.ascii_only?
+        next
+      end
+      response = HTTParty.get("http://rtw.ml.cmu.edu/rtw/api/json0?ent1=&lit1=#{lit1}&predicate=*&ent2=&lit2=&agent=KI%2CKB%2CCKB%2COPRA%2COCMC")
       json = JSON.parse(response)
       if json["kind"] == "NELLQueryDemoJSON0"
         begin

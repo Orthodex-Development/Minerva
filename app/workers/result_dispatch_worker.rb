@@ -1,14 +1,14 @@
 class ResultDispatchWorker
   include Sidekiq::Worker
 
-  def perform(id, user)
+  def perform(movie_id, user)
     $REDIS ||= Redis.new(url: ENV["REDISCLOUD_URL"] || 'redis://localhost:6379/14')
-    sentiment_groups = JSON.parse($REDIS.get "sg_#{id}")
+    sentiment_groups = JSON.parse($REDIS.get "sg_#{movie_id}")
 
     movie_aspect_sentiment = {}
 
     sentiment_groups.each do |k, v|
-      movie_aspect_sentiment[k] = JSON.parse($REDIS.hget "sa_sg_#{id}", k.to_s)
+      movie_aspect_sentiment[k] = JSON.parse($REDIS.hget "sa_sg_#{movie_id}", k.to_s)
     end
 
     results = ""
@@ -17,10 +17,9 @@ class ResultDispatchWorker
       results << k.to_s + " => " + ResultDispatchWorker.get_label(v) + "\n"
     end
 
-    full_sentiment = ResultDispatchWorker.get_label(JSON.parse($REDIS.get "sa_rv_#{id}"))
+    full_sentiment = ResultDispatchWorker.get_label(JSON.parse($REDIS.get "sa_rv_#{movie_id}"))
 
     results = "Here are the results:\nOverall sentiment: #{full_sentiment}\n" + results
-
     response = HTTParty.post(Rails.application.secrets.BOT_ENDPOINT + "analysis",
       :body => {
           :message => results,
