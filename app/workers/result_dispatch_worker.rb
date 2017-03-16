@@ -37,29 +37,29 @@ class ResultDispatchWorker
       if params["score"] < 0
         return "no strong sentiment"
       elsif params["score"].between? 0, 1.2
-        return "1 like"
+        return "(y)"
       elsif params["score"].between? 1.2, 1.7
-        return "2 likes"
+        return "(y) (y)"
       elsif params["score"].between? 1.7, 2.7
-        return "3 likes"
+        return "(y) (y) (y)"
       elsif params["score"].between? 2.7, 3.3
-        return "4 likes"
+        return "(y) (y) (y) (y)"
       elsif params["score"] > 3.3
-        return "5 likes"
+        return "(y) (y) (y) (y)"
       end
     when "neg"
       if params["score"] < 0
         return "no strong sentiment"
       elsif params["score"].between? 0, 1.2
-        return "1 dislike"
+        return "👎"
       elsif params["score"].between? 1.2, 1.7
-        return "2 dislikes"
+        return "👎👎"
       elsif params["score"].between? 1.7, 2,7
-        return "3 dislikes"
+        return "👎👎👎"
       elsif params["score"].between? 2.7, 3.3
-        return "4 dislikes"
+        return "👎👎👎👎"
       elsif params["score"] > 3.3
-        return "5 dislikes"
+        return "👎👎👎👎👎"
       end
     end
   end
