@@ -1,7 +1,0 @@
-production: &production
-  adapter: redis
-  url: ENV["REDISTOGO_URL"]
-development: &development
-  adapter: redis
-  url: redis://localhost:6379/16
-test: *development

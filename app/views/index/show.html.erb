@@ -1,0 +1,11 @@
+<h1>Movie Details:</h1>
+<div class="center">
+<% @results.each do |key, value| %>
+  <p> Movie id: <%= key %> </p>
+  <p> Review: <%= value[:review] %> </p>
+  <p> Sentiment of full Review: <%= value[:sa_rv] %> </p>
+  <p> Sentiment Groups: <%= value[:sg] %> </p>
+  <p> Aspect Based sentiments: <%= value[:asp_s] %> </p>
+<% end %>
+<%= link_to "Back", :root %>
+</div>
