@@ -23,7 +23,7 @@ class IndexController < ApplicationController
         sg.each do |k, v|
           aspect_sentiments[k] = JSON.parse(@redis.hget "sa_sg_#{@id}", k.to_s)
         end
-        @results[@id.to_sym][:asp_s] = aspect_sentiments
+        @results[@id.to_sym][:asp_s] = aspect_sentiments.to_json
       end
     end
   end

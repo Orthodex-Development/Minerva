@@ -1,3 +1,8 @@
+<%= content_for :head do %>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<% end %>
+
 <h1>Movie Details:</h1>
 <div class="center">
 <% @results.each do |key, value| %>
@@ -5,7 +10,49 @@
   <p> Review: <%= value[:review] %> </p>
   <p> Sentiment of full Review: <%= value[:sa_rv] %> </p>
   <p> Sentiment Groups: <%= value[:sg] %> </p>
-  <p> Aspect Based sentiments: <%= value[:asp_s] %> </p>
+  <p> Aspect Based sentiments: <p id="asp_s"><%= value[:asp_s] %></p></p>
 <% end %>
 <%= link_to "Back", :root %>
 </div>
+
+<div id="myDiv">
+  <!-- Plotly chat drawn here -->
+</div>
+
+<script type="text/javascript">
+  var sentiments = JSON.parse($('#asp_s').text());
+  var score = [];
+  var concepts = Object.keys(sentiments);
+  for (var i = 0; i < concepts.length; i++) {
+      score[i] = sentiments[concepts[i]].score;
+  };
+  console.log("Score:" + score);
+  console.log("Concepts:" + concepts);
+
+  var trace1 = {
+    x: concepts,
+    y: score,
+    type: 'bar',
+    text: concepts
+  };
+
+  var data = [trace1];
+
+  var layout = {
+    title: 'Aspect level sentiment score' ,
+    font:{
+      family: 'Raleway, snas-serif'
+    },
+    showlegend: false,
+    xaxis: {
+      tickangle: -45
+    },
+    yaxis: {
+      zeroline: false,
+      gridwidth: 2
+    },
+    bargap :0.05
+  };
+
+  Plotly.newPlot('myDiv', data, layout);
+</script>
