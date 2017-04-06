@@ -18,7 +18,7 @@ class IndexController < ApplicationController
       when "sa_rv_#{@id}" then @results[@id.to_sym][:sa_rv] = JSON.parse(@redis.get key)
       when "sg_#{@id}"
         sg = JSON.parse(@redis.get key)
-        @results[@id.to_sym][:sg] = sg
+        @results[@id.to_sym][:sg] = sg.to_json
         aspect_sentiments = {}
         sg.each do |k, v|
           aspect_sentiments[k] = JSON.parse(@redis.hget "sa_sg_#{@id}", k.to_s)
