@@ -11,6 +11,9 @@ gem 'sidekiq'
 gem 'sidekiq-batch'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
+gem 'jquery-rails', '~> 4.3.1'
+gem 'sprockets-rails', '3.2.0'
+gem 'turbolinks', '~> 5.0.1'
 # Use Redis adapter to run sidekiq jobs and store processed review data
 # Sidekiq jobs are stored in database 12 while review data is stored in
 # another redis url.

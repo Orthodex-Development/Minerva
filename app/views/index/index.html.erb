@@ -1,0 +1,7 @@
+<h2>Welcome to Minerva.</h2>
+<div id="center">
+  <% @results.each do |element| %>
+    <p><%= element %></p>
+    <p><%= link_to 'Show', results_path(element) %></p>
+  <% end %>
+</div>

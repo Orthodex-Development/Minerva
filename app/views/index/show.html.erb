@@ -1,0 +1,247 @@
+<%= content_for :head do %>
+  <style>
+
+	.node {
+		cursor: pointer;
+	}
+
+	.node circle {
+	  fill: #fff;
+	  stroke: steelblue;
+	  stroke-width: 3px;
+	}
+
+	.node text {
+	  font: 12px sans-serif;
+	}
+
+	.link {
+	  fill: none;
+	  stroke: #ccc;
+	  stroke-width: 2px;
+	}
+
+  </style>
+
+
+  <!-- load the d3.js library -->
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<% end %>
+
+<h1>Movie Details:</h1>
+<div class="center">
+<% @results.each do |key, value| %>
+  <p> Movie id: <%= key %> </p>
+  <p> Review: <%= value[:review] %> </p>
+  <p> Sentiment of full Review: <%= value[:sa_rv] %> </p>
+  <p> Sentiment Groups: <p id="sg"><%= value[:sg] %></p> </p>
+  <p> Aspect Based sentiments: <p id="asp_s"><%= value[:asp_s] %></p></p>
+<% end %>
+<%= link_to "Back", :root %>
+</div>
+
+<div id="myDiv">
+  <!-- Plotly chat drawn here -->
+</div>
+
+<script type="text/javascript">
+  var sentiments = JSON.parse($('#asp_s').text());
+  var score = [];
+  var concepts = Object.keys(sentiments);
+  for (var i = 0; i < concepts.length; i++) {
+      score[i] = sentiments[concepts[i]].score;
+  };
+  console.log("Score:" + score);
+  console.log("Concepts:" + concepts);
+
+  var trace1 = {
+    x: concepts,
+    y: score,
+    type: 'bar',
+    text: concepts
+  };
+
+  var data = [trace1];
+
+  var layout = {
+    title: 'Aspect level sentiment score' ,
+    font:{
+      family: 'Raleway, snas-serif'
+    },
+    showlegend: false,
+    xaxis: {
+      tickangle: -45
+    },
+    yaxis: {
+      zeroline: false,
+      gridwidth: 2
+    },
+    bargap :0.05
+  };
+
+  Plotly.newPlot('myDiv', data, layout);
+
+  var sent_groups = JSON.parse($('#sg').text());
+  opinions = [];
+  sentences = [];
+  children = [];
+
+  for (var i = 0; i < concepts.length; i++) {
+    opinions[i] = sent_groups[concepts[i]].opinions;
+    sentences[i] = sent_groups[concepts[i]].sentences;
+    child = {
+      "name": concepts[i],
+      "parent": "Movie",
+      "children": [
+        {
+          "name": "opinion: " + opinions[i],
+          "parent": concepts[i]
+        },
+        {
+          "name": "sentence: " + sentences[i],
+          "parent": concepts[i]
+        }
+      ]
+    };
+    children.push(child);
+  };
+
+  var treeData = [
+  {
+    "name": "Movie",
+    "parent": "null",
+    "children": children
+  }
+];
+
+
+// ************** Generate the tree diagram	 *****************
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+	width = 960 - margin.right - margin.left,
+	height = 1000 - margin.top - margin.bottom;
+
+var i = 0,
+	duration = 750,
+	root;
+
+var tree = d3.layout.tree()
+	.size([height, width]);
+
+var diagonal = d3.svg.diagonal()
+	.projection(function(d) { return [d.y, d.x]; });
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width + margin.right + margin.left)
+	.attr("height", height + margin.top + margin.bottom)
+  .append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+root = treeData[0];
+root.x0 = height / 2;
+root.y0 = 0;
+
+update(root);
+
+d3.select(self.frameElement).style("height", "500px");
+
+function update(source) {
+
+  // Compute the new tree layout.
+  var nodes = tree.nodes(root).reverse(),
+	  links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+  // Update the nodes…
+  var node = svg.selectAll("g.node")
+	  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+	  .attr("class", "node")
+	  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+	  .on("click", click);
+
+  nodeEnter.append("circle")
+	  .attr("r", 1e-6)
+	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeEnter.append("text")
+	  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+	  .attr("dy", ".35em")
+	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+	  .text(function(d) { return d.name; })
+	  .style("fill-opacity", 1e-6);
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+  nodeUpdate.select("circle")
+	  .attr("r", 10)
+	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeUpdate.select("text")
+	  .style("fill-opacity", 1);
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+	  .remove();
+
+  nodeExit.select("circle")
+	  .attr("r", 1e-6);
+
+  nodeExit.select("text")
+	  .style("fill-opacity", 1e-6);
+
+  // Update the links…
+  var link = svg.selectAll("path.link")
+	  .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+	  .attr("class", "link")
+	  .attr("d", function(d) {
+		var o = {x: source.x0, y: source.y0};
+		return diagonal({source: o, target: o});
+	  });
+
+  // Transition links to their new position.
+  link.transition()
+	  .duration(duration)
+	  .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+	  .duration(duration)
+	  .attr("d", function(d) {
+		var o = {x: source.x, y: source.y};
+		return diagonal({source: o, target: o});
+	  })
+	  .remove();
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+	d.x0 = d.x;
+	d.y0 = d.y;
+  });
+}
+
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+	d._children = d.children;
+	d.children = null;
+  } else {
+	d.children = d._children;
+	d._children = null;
+  }
+  update(d);
+}
+</script>
